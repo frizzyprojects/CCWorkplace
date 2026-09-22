@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CC Workplace | Ceylon Cyber Workplace</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js for 3D Interactive Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Vanilla Tilt for 3D Card Hover Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#00f2fe',
+                            indigo: '#6366f1',
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                            darkBlue: '#030712',
+                            cardDark: '#0b0f19',
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-main': 'linear-gradient(135deg, #020617 0%, #090d2e 45%, #1e0b36 100%)',
+                        'gradient-glow': 'radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.15), rgba(0, 242, 254, 0.05) 70%)',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
+                        'gradient-shift': 'gradient-shift 8s ease infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: '0.6', filter: 'drop-shadow(0 0 15px rgba(0, 242, 254, 0.6))' },
+                            '50%': { opacity: '1', filter: 'drop-shadow(0 0 25px rgba(168, 85, 247, 0.8))' },
+                        },
+                        'gradient-shift': {
+                            '0%, 100%': { 'background-position': '0% 50%' },
+                            '50%': { 'background-position': '100% 50%' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Deep Blue to Deep Purple Background */
+        body {
+            background: linear-gradient(135deg, #020617 0%, #080d2a 40%, #1a0833 75%, #050212 100%);
+            background-attachment: fixed;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism card styling */
+        .glass-card {
+            background: rgba(13, 18, 36, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(168, 85, 247, 0.18);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(0, 242, 254, 0.5);
+            box-shadow: 0 15px 35px -5px rgba(0, 242, 254, 0.25), 0 0 15px rgba(168, 85, 247, 0.2);
+            transform: translateY(-4px);
+        }
+
+        /* 3D Transform Utilities */
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+        .translate-z-10 {
+            transform: translateZ(30px);
+        }
+        .translate-z-20 {
+            transform: translateZ(60px);
+        }
+
+        /* Gradient Text Helper */
+        .gradient-text-bp {
+            background: linear-gradient(135deg, #00f2fe 0%, #818cf8 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Glowing Button Effects */
+        .btn-glow-purple {
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+        .btn-glow-purple::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(135deg, #00f2fe, #a855f7, #ec4899);
+            border-radius: inherit;
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .btn-glow-purple:hover::before {
+            opacity: 1;
+        }
+        .btn-glow-purple:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.6);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #3b0764; border-radius: 4px; border: 1px solid rgba(168, 85, 247, 0.3); }
+        ::-webkit-scrollbar-thumb:hover { background: #6b21a8; }
+
+        /* Code Editor Line Numbers and Layout */
+        .editor-container {
+            background: #070a14;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        /* Code Textarea & Highlight Sync */
+        #code-input {
+            tab-size: 2;
+            white-space: pre;
+            word-wrap: normal;
+            font-family: 'Fira Code', monospace;
+            caret-color: #00f2fe;
+        }
+
+        .animated-mesh-bg {
+            background-size: 200% 200%;
+            animation: gradient-shift 12s ease infinite;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen text-slate-100 antialiased selection:bg-purple-500 selection:text-white">
+
+    <!-- 3D Interactive Three.js Particle Background -->
+    <canvas id="bg-3d-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-70"></canvas>
+
+    <!-- Background Glow Orbs -->
+    <div class="fixed top-1/4 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed bottom-1/4 right-10 w-[30rem] h-[30rem] bg-purple-600/15 rounded-full blur-[150px] pointer-events-none z-0"></div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex flex-col min-h-screen">
+
+        <!-- Navigation Header -->
+        <header class="sticky top-0 z-50 glass-card border-b border-purple-500/20 bg-slate-950/70 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    
+                    <!-- Branding Logo -->
+                    <a href="#" class="flex items-center space-x-3 group">
+                        <div class="relative w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-purple-600 p-[2px] shadow-[0_0_15px_rgba(0,242,254,0.4)] group-hover:scale-105 transition-transform">
+                            <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                                <i data-lucide="layers" class="w-5 h-5 text-cyan-400 group-hover:rotate-12 transition-transform"></i>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="flex items-center space-x-1.5">
+                                <span class="font-display font-extrabold text-xl tracking-tight text-white">CC</span>
+                                <span class="font-display font-bold text-xl gradient-text-bp">Workplace</span>
+                            </div>
+                            <span class="text-[10px] text-purple-300/70 tracking-widest uppercase font-mono">Ceylon Cyber Workplace</span>
+                        </div>
+                    </a>
+
+                    <!-- Navigation Links -->
+                    <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
+                        <a href="#studio" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-800/50 transition-colors flex items-center space-x-1.5">
+                            <i data-lucide="code-2" class="w-4 h-4 text-cyan-400"></i>
+                            <span>VS Code IDE</span>
+                        </a>
+                        <a href="#github-deploy" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-purple-300 hover:bg-slate-800/50 transition-colors flex items-center space-x-1.5">
+                            <i data-lucide="github" class="w-4 h-4 text-purple-400"></i>
+                            <span>GitHub Deploy</span>
+                        </a>
+                        <a href="#services" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-800/50 transition-colors flex items-center space-x-1.5">
+                            <i data-lucide="palette" class="w-4 h-4 text-indigo-400"></i>
+                            <span>Services</span>
+                        </a>
+                        <a href="#recommendations" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-purple-300 hover:bg-slate-800/50 transition-colors flex items-center space-x-1.5">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+                            <span>Find Talent</span>
+                        </a>
+                    </nav>
+
+                    <!-- Header Actions & Auth Top Right -->
+                    <div class="flex items-center space-x-3">
+                        <a href="#github-deploy" class="hidden sm:inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700 hover:border-purple-500 text-xs text-slate-300 transition-colors">
+                            <i data-lucide="git-pull-request" class="w-3.5 h-3.5 text-cyan-400"></i>
+                            <span>Connect Repo</span>
+                        </a>
+
+                        <!-- Auth Container (Dynamic user state or Modal trigger) -->
+                        <div id="auth-buttons-container" class="flex items-center space-x-2">
+                            <button onclick="openAuthModal('signin')" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-cyan-400 transition-colors">
+                                Sign In
+                            </button>
+                            <button onclick="openAuthModal('register')" class="btn-glow-purple px-4 py-2 rounded-xl text-xs font-bold text-white shadow-lg flex items-center space-x-1">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                                <span>Register</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                
+                <!-- Badge Pill -->
+                <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full glass-card border border-cyan-500/30 mb-8 animate-float">
+                    <span class="relative flex h-2.5 w-2.5">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+                    </span>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-cyan-300">Ceylon Cyber Creative & Tech Hub</span>
+                    <span class="text-xs text-purple-400 font-mono"> By Frizzi Evoner</span>
+                </div>
+
+                <!-- Main Hero Title -->
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold tracking-tight text-white leading-none mb-6">
+                    Video Editing, Graphic Design & <br class="hidden sm:inline" />
+                    <span class="gradient-text-bp">Developers in One Place.</span>
+                </h1>
+
+                <!-- Description -->
+                <p class="max-w-3xl mx-auto text-base sm:text-lg text-slate-300 leading-relaxed mb-10">
+                    <strong class="text-cyan-400">CC Workplace (Ceylon Cyber Workplace)</strong> unites world-class Sri Lankan and global creators. Seamlessly publish video editing services, showcase graphic design portfolios, link GitHub repositories, and preview code live inside a built-in VS Code studio.
+                </p>
+
+                <!-- Hero Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#studio" class="w-full sm:w-auto btn-glow-purple px-8 py-4 rounded-xl font-bold text-sm text-white shadow-xl flex items-center justify-center space-x-2">
+                        <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                        <span>Launch Live VS Code Preview</span>
+                    </a>
+                    <a href="#services" class="w-full sm:w-auto glass-card glass-card-hover px-8 py-4 rounded-xl font-semibold text-sm text-slate-200 border border-purple-500/30 flex items-center justify-center space-x-2">
+                        <i data-lucide="search" class="w-4 h-4 text-cyan-400"></i>
+                        <span>Explore Marketplace</span>
+                    </a>
+                </div>
+
+                <!-- Live Metrics Ticker -->
+                <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                    <div class="glass-card p-4 rounded-2xl border border-indigo-500/20">
+                        <div class="text-2xl sm:text-3xl font-display font-bold text-cyan-400">1,200+</div>
+                        <div class="text-xs text-slate-400 font-medium mt-1">Verified Creators</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border border-purple-500/20">
+                        <div class="text-2xl sm:text-3xl font-display font-bold text-purple-400">4,800+</div>
+                        <div class="text-xs text-slate-400 font-medium mt-1">Video & Design Gigs</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border border-indigo-500/20">
+                        <div class="text-2xl sm:text-3xl font-display font-bold text-cyan-400">&lt; 1 sec</div>
+                        <div class="text-xs text-slate-400 font-medium mt-1">IDE Live Render</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border border-purple-500/20">
+                        <div class="text-2xl sm:text-3xl font-display font-bold text-purple-400">100%</div>
+                        <div class="text-xs text-slate-400 font-medium mt-1">GitHub Integrated</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- GitHub Link & Deploy Integration Section -->
+        <section id="github-deploy" class="py-16 relative z-10 border-t border-purple-500/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="glass-card rounded-3xl p-6 sm:p-10 border border-indigo-500/30 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/80">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        
+                        <div class="lg:col-span-7">
+                            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-mono mb-4">
+                                <i data-lucide="github" class="w-3.5 h-3.5"></i>
+                                <span>GitHub Workspace Connector</span>
+                            </div>
+                            <h2 class="text-3xl sm:text-4xl font-display font-bold text-white mb-4">
+                                Attach GitHub Repos & <br/>
+                                <span class="gradient-text-bp">Deploy Live Portfolio Demos</span>
+                            </h2>
+                            <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                                Are you a developer or graphic designer with code templates? Paste your GitHub repository URL to connect your project directly to CC Workplace, generating an instant shareable preview link for potential clients.
+                            </p>
+
+                            <!-- GitHub Deploy Form -->
+                            <form onsubmit="handleGithubDeploy(event)" class="space-y-4">
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                                            <i data-lucide="link" class="w-4 h-4"></i>
+                                        </div>
+                                        <input type="text" id="repo-url-input" placeholder="github.com/ceyloncyber/motion-graphics-web" required class="w-full bg-slate-950/90 border border-purple-500/40 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors">
+                                    </div>
+                                    <button type="submit" class="btn-glow-purple px-6 py-3 rounded-xl font-bold text-xs text-white uppercase tracking-wider flex items-center justify-center space-x-2 shadow-lg">
+                                        <i data-lucide="rocket" class="w-4 h-4"></i>
+                                        <span>Deploy Preview</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Mock Interactive Terminal Log -->
+                        <div class="lg:col-span-5">
+                            <div class="bg-slate-950 rounded-2xl p-4 border border-cyan-500/30 font-mono text-xs space-y-2.5">
+                                <div class="flex items-center justify-between border-b border-slate-800 pb-2 text-slate-400">
+                                    <span class="flex items-center space-x-1.5 text-cyan-400">
+                                        <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+                                        <span>CC Build Console</span>
+                                    </span>
+                                    <span class="text-[10px] text-emerald-400">Active Node</span>
+                                </div>
+                                <div class="text-slate-400">$ git clone https://github.com/ceyloncyber/sample</div>
+                                <div class="text-slate-300">[INFO] Compiling video assets and web preview...</div>
+                                <div class="text-purple-400">[SUCCESS] 3D Canvas bundle generated (2.4ms)</div>
+                                <div class="text-emerald-400 font-bold flex items-center justify-between bg-emerald-950/40 p-2 rounded border border-emerald-500/20">
+                                    <span>STATUS: LIVE_PREVIEW_READY</span>
+                                    <a href="#studio" class="underline text-xs text-cyan-300 hover:text-white">View in IDE &rarr;</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Services Marketplace (3D Tilt Cards) -->
+        <section id="services" class="py-20 relative z-10 border-t border-purple-500/20 bg-slate-950/60">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="text-xs font-mono text-purple-400 uppercase tracking-widest">Ceylon Cyber Marketplace</span>
+                    <h2 class="text-3xl sm:text-5xl font-display font-bold text-white mt-2 mb-4">
+                        Video Editing & <span class="gradient-text-bp">Graphic Design Services</span>
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base">
+                        Browse top service packages provided by creators on Ceylon Cyber Workplace. Click to view details or hire creators directly.
+                    </p>
+                </div>
+
+                <!-- Service Category Filter Tabs -->
+                <div class="flex flex-wrap justify-center gap-2 mb-12">
+                    <button onclick="filterServices('all')" class="svc-tab px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white shadow-lg">All Services</button>
+                    <button onclick="filterServices('video')" class="svc-tab px-4 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-slate-300 hover:text-white border border-slate-800">Video Editing & Motion</button>
+                    <button onclick="filterServices('design')" class="svc-tab px-4 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-slate-300 hover:text-white border border-slate-800">Graphic Design & Vectors</button>
+                    <button onclick="filterServices('dev')" class="svc-tab px-4 py-2 rounded-xl text-xs font-semibold bg-slate-900 text-slate-300 hover:text-white border border-slate-800">Web & Software Dev</button>
+                </div>
+
+                <!-- 3D Tilt Cards Grid -->
+                <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Card 1: Video Editing -->
+                    <div class="service-card glass-card glass-card-hover rounded-2xl p-6 preserve-3d cursor-pointer" data-category="video" data-tilt data-tilt-max="12" data-tilt-speed="400">
+                        <div class="h-48 rounded-xl bg-gradient-to-tr from-indigo-950 to-purple-900 mb-5 overflow-hidden relative translate-z-10 flex items-center justify-center border border-purple-500/20">
+                            <!-- SVG Cover Art -->
+                            <svg class="w-24 h-24 text-cyan-400 opacity-80 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-slate-950/80 text-cyan-300 text-[11px] font-mono border border-cyan-500/30">From $45</span>
+                        </div>
+                        <div class="translate-z-20">
+                            <div class="flex items-center space-x-2 text-xs text-purple-400 font-mono mb-2">
+                                <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                                <span>Video Editing</span>
+                            </div>
+                            <h3 class="text-xl font-bold font-display text-white mb-2">Cinematic YouTube & Reel Editing</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed mb-4">High retention cuts, sound design, color grading, dynamic captions, and motion overlays.</p>
+                            <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                                <div class="flex items-center space-x-1 text-amber-400 text-xs font-bold">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
+                                    <span>4.9 <span class="text-slate-500 font-normal">(142)</span></span>
+                                </div>
+                                <button onclick="openHireModal('Cinematic Video Editing', 'Point to Break Studios')" class="text-xs font-bold text-cyan-400 hover:text-white flex items-center space-x-1">
+                                    <span>Hire Creator</span>
+                                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Graphic Design -->
+                    <div class="service-card glass-card glass-card-hover rounded-2xl p-6 preserve-3d cursor-pointer" data-category="design" data-tilt data-tilt-max="12" data-tilt-speed="400">
+                        <div class="h-48 rounded-xl bg-gradient-to-tr from-purple-950 to-pink-950 mb-5 overflow-hidden relative translate-z-10 flex items-center justify-center border border-purple-500/20">
+                            <svg class="w-24 h-24 text-purple-300 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-slate-950/80 text-purple-300 text-[11px] font-mono border border-purple-500/30">From $30</span>
+                        </div>
+                        <div class="translate-z-20">
+                            <div class="flex items-center space-x-2 text-xs text-purple-400 font-mono mb-2">
+                                <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+                                <span>Graphic Design</span>
+                            </div>
+                            <h3 class="text-xl font-bold font-display text-white mb-2">High CTR YouTube Thumbnail Art</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed mb-4">Custom vector manipulation, 3D text titles, glowing light effects, and branding packages.</p>
+                            <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                                <div class="flex items-center space-x-1 text-amber-400 text-xs font-bold">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
+                                    <span>5.0 <span class="text-slate-500 font-normal">(98)</span></span>
+                                </div>
+                                <button onclick="openHireModal('Thumbnail Design', 'FRIZZI Graphics')" class="text-xs font-bold text-purple-300 hover:text-white flex items-center space-x-1">
+                                    <span>Hire Creator</span>
+                                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Software / Web Dev -->
+                    <div class="service-card glass-card glass-card-hover rounded-2xl p-6 preserve-3d cursor-pointer" data-category="dev" data-tilt data-tilt-max="12" data-tilt-speed="400">
+                        <div class="h-48 rounded-xl bg-gradient-to-tr from-cyan-950 to-indigo-950 mb-5 overflow-hidden relative translate-z-10 flex items-center justify-center border border-cyan-500/20">
+                            <svg class="w-24 h-24 text-cyan-300 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-slate-950/80 text-cyan-300 text-[11px] font-mono border border-cyan-500/30">From $120</span>
+                        </div>
+                        <div class="translate-z-20">
+                            <div class="flex items-center space-x-2 text-xs text-cyan-400 font-mono mb-2">
+                                <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+                                <span>Software & Web</span>
+                            </div>
+                            <h3 class="text-xl font-bold font-display text-white mb-2">Custom Web Apps & 3D Interactive Sites</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed mb-4">Tailwind CSS, React, Three.js 3D animations, and seamless GitHub deployment integration.</p>
+                            <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                                <div class="flex items-center space-x-1 text-amber-400 text-xs font-bold">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
+                                    <span>4.95 <span class="text-slate-500 font-normal">(210)</span></span>
+                                </div>
+                                <button onclick="openHireModal('Full Stack Web App', 'Ceylon Cyber Dev Team')" class="text-xs font-bold text-cyan-400 hover:text-white flex items-center space-x-1">
+                                    <span>Hire Developer</span>
+                                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Talent Recommendation Engine Section -->
+        <section id="recommendations" class="py-20 relative z-10 border-t border-purple-500/20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 text-xs font-mono text-cyan-400 uppercase tracking-widest mb-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+                            <span>Smart Talent Recommendation</span>
+                        </div>
+                        <h2 class="text-3xl sm:text-4xl font-display font-bold text-white">
+                            Find Best Customers & <span class="gradient-text-bp">Top Talent</span>
+                        </h2>
+                    </div>
+
+                    <!-- Search & Role Filter -->
+                    <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
+                        <div class="relative">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="talent-search" oninput="filterTalents()" placeholder="Search skill e.g. Motion, SVG, React..." class="bg-slate-900 border border-purple-500/30 text-xs text-slate-200 rounded-xl py-2.5 pl-9 pr-4 focus:outline-none focus:border-cyan-400 w-full sm:w-64">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Talent Recommendation Grid -->
+                <div id="talent-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    
+                    <!-- Creator 1 -->
+                    <div class="talent-card glass-card glass-card-hover rounded-2xl p-5 border border-purple-500/20 flex flex-col justify-between" data-skills="video motion color editing">
+                        <div>
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[2px]">
+                                    <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-bold text-cyan-300">PT</div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-1">
+                                        <h4 class="font-bold text-sm text-white">Point to Break</h4>
+                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-cyan-400" title="Ceylon Cyber Verified"></i>
+                                    </div>
+                                    <span class="text-[11px] text-purple-300">Lead Video Editor</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 mb-4">
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">After Effects</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Premiere</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">4K Color</span>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                            <span class="text-xs text-slate-400 font-mono">$35/hr</span>
+                            <button onclick="openHireModal('Video Project', 'Point to Break')" class="btn-glow-purple px-3 py-1.5 rounded-lg text-xs font-bold text-white">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Creator 2 -->
+                    <div class="talent-card glass-card glass-card-hover rounded-2xl p-5 border border-purple-500/20 flex flex-col justify-between" data-skills="graphic vector design thumbnail svg">
+                        <div>
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-purple-500 to-pink-600 p-[2px]">
+                                    <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-bold text-purple-300">FR</div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-1">
+                                        <h4 class="font-bold text-sm text-white">FRIZZI</h4>
+                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-purple-400" title="Ceylon Cyber Verified"></i>
+                                    </div>
+                                    <span class="text-[11px] text-purple-300">Vector & Brand Designer</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 mb-4">
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Illustrator</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">3D Banner</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Logo Art</span>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                            <span class="text-xs text-slate-400 font-mono">$28/hr</span>
+                            <button onclick="openHireModal('Graphic Branding', 'FRIZZI')" class="btn-glow-purple px-3 py-1.5 rounded-lg text-xs font-bold text-white">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Creator 3 -->
+                    <div class="talent-card glass-card glass-card-hover rounded-2xl p-5 border border-purple-500/20 flex flex-col justify-between" data-skills="developer react tailwind threejs github software">
+                        <div>
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 p-[2px]">
+                                    <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-bold text-cyan-300">CC</div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-1">
+                                        <h4 class="font-bold text-sm text-white">Ceylon Devs</h4>
+                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-cyan-400" title="Ceylon Cyber Verified"></i>
+                                    </div>
+                                    <span class="text-[11px] text-purple-300">3D Web Application Engineer</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 mb-4">
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Three.js</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Tailwind</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">GitHub Actions</span>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                            <span class="text-xs text-slate-400 font-mono">$45/hr</span>
+                            <button onclick="openHireModal('Web App Build', 'Ceylon Devs')" class="btn-glow-purple px-3 py-1.5 rounded-lg text-xs font-bold text-white">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Creator 4 -->
+                    <div class="talent-card glass-card glass-card-hover rounded-2xl p-5 border border-purple-500/20 flex flex-col justify-between" data-skills="vfx animation video 3d overlay stream">
+                        <div>
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 p-[2px]">
+                                    <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-bold text-purple-300">FX</div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-1">
+                                        <h4 class="font-bold text-sm text-white">VFX Master Sri Lanka</h4>
+                                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-purple-400" title="Ceylon Cyber Verified"></i>
+                                    </div>
+                                    <span class="text-[11px] text-purple-300">3D Motion & Stream VFX</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 mb-4">
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Blender</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Twitch Overlay</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-mono">Unreal 5</span>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                            <span class="text-xs text-slate-400 font-mono">$40/hr</span>
+                            <button onclick="openHireModal('3D VFX Overlay', 'VFX Master Sri Lanka')" class="btn-glow-purple px-3 py-1.5 rounded-lg text-xs font-bold text-white">
+                                Contact
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-purple-500/20 bg-slate-950/80 py-10 relative z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+                <div class="flex items-center space-x-2">
+                    <div class="w-6 h-6 rounded bg-gradient-to-tr from-cyan-400 to-purple-600 flex items-center justify-center font-bold text-slate-950 text-[10px]">
+                        CC
+                    </div>
+                    <span class="font-medium text-slate-300">Ceylon Cyber Workplace &copy; 2026. All rights reserved.</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="#studio" class="hover:text-cyan-400 transition-colors">IDE Studio</a>
+                    <a href="#services" class="hover:text-cyan-400 transition-colors">Services</a>
+                    <a href="#github-deploy" class="hover:text-purple-300 transition-colors">GitHub Sync</a>
+                    <a href="#" onclick="showToast('Ceylon Cyber Documentation loaded.', 'info')" class="hover:text-cyan-400 transition-colors">Docs</a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Sign In / Register Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div id="auth-modal-card" class="glass-card rounded-3xl p-6 sm:p-8 w-full max-w-md border border-purple-500/30 relative transform scale-95 transition-transform duration-300">
+            
+            <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Tabs -->
+            <div class="flex items-center space-x-2 border-b border-slate-800 pb-4 mb-6">
+                <button id="tab-signin" onclick="switchAuthTab('signin')" class="text-sm font-bold text-cyan-400 border-b-2 border-cyan-400 pb-1">Sign In</button>
+                <button id="tab-register" onclick="switchAuthTab('register')" class="text-sm font-bold text-slate-400 hover:text-slate-200 pb-1">Register</button>
+            </div>
+
+            <!-- Sign In Form -->
+            <form id="signin-form" onsubmit="handleAuthSubmit(event, 'signin')" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Email Address</label>
+                    <input type="email" required placeholder="creator@ceyloncyber.com" class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Password</label>
+                    <input type="password" required placeholder="••••••••" class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <button type="submit" class="w-full btn-glow-purple py-3 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-lg mt-2">
+                    Sign In to CC Workplace
+                </button>
+            </form>
+
+            <!-- Register Form (Hidden initially) -->
+            <form id="register-form" onsubmit="handleAuthSubmit(event, 'register')" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Account Type</label>
+                    <select class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-4 py-2.5 text-xs text-cyan-300 focus:outline-none focus:border-cyan-400">
+                        <option value="creator">Creator / Devoloper (Video Editor / Designer / Dev)</option>
+                        <option value="client">Client / Employer</option>
+                        <option value="student">Student </option>
+                    </select> 
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Full Name</label>
+                    <input type="text" required placeholder="First name Last Name" class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Email Address</label>
+                    <input type="email" required placeholder="name@gmail.com" class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Password</label>
+                    <input type="password" required placeholder="••••••••" class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-400">
+                </div>
+                <button type="submit" class="w-full btn-glow-purple py-3 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-lg mt-2">
+                    Create CC Workplace Account
+                </button>
+            </form>
+
+            <div class="mt-4 pt-4 border-t border-slate-800 text-center">
+                <button onclick="demoQuickAuth()" class="text-xs text-slate-400 hover:text-cyan-300 transition-colors">
+                    Continue as Guest Creator (Instant Demo)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hire / Project Inquiry Modal -->
+    <div id="hire-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div id="hire-modal-card" class="glass-card rounded-3xl p-6 sm:p-8 w-full max-w-lg border border-cyan-500/30 relative transform scale-95 transition-transform duration-300">
+            
+            <button onclick="closeHireModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="flex items-center space-x-2 text-xs font-mono text-cyan-400 uppercase tracking-wider mb-1">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Hire Creator Direct</span>
+            </div>
+            <h3 class="text-2xl font-display font-bold text-white mb-2" id="hire-modal-title">Project Inquiry</h3>
+            <p class="text-xs text-slate-400 mb-6">Target Creator: <span id="hire-modal-creator" class="text-purple-300 font-bold"></span></p>
+
+            <form onsubmit="handleHireSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Project Requirements</label>
+                    <textarea required rows="3" placeholder="Describe your video editing, graphic design, or software dev needs..." class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyan-400"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Budget ($ USD)</label>
+                        <input type="number" required placeholder="150" class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-mono text-slate-400 mb-1 uppercase">Deadline</label>
+                        <input type="date" required class="w-full bg-slate-950/90 border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-400">
+                    </div>
+                </div>
+                <button type="submit" class="w-full btn-glow-purple py-3 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-lg">
+                    Send Direct Offer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // 1. Three.js 3D Interactive Particle Mesh
+        let scene, camera, renderer, particlesMesh;
+        let mouseX = 0, mouseY = 0;
+
+        function init3DBackground() {
+            const canvas = document.getElementById('bg-3d-canvas');
+            scene = new THREE.Scene();
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Particles Geometry
+            const particlesCount = 350;
+            const posArray = new Float32Array(particlesCount * 3);
+            const colorArray = new Float32Array(particlesCount * 3);
+
+            const colorBlue = new THREE.Color('#00f2fe');
+            const colorPurple = new THREE.Color('#a855f7');
+
+            for(let i = 0; i < particlesCount * 3; i += 3) {
+                posArray[i] = (Math.random() - 0.5) * 80;
+                posArray[i+1] = (Math.random() - 0.5) * 80;
+                posArray[i+2] = (Math.random() - 0.5) * 80;
+
+                const mixedColor = colorBlue.clone().lerp(colorPurple, Math.random());
+                colorArray[i] = mixedColor.r;
+                colorArray[i+1] = mixedColor.g;
+                colorArray[i+2] = mixedColor.b;
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.25,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.85
+            });
+
+            particlesMesh = new THREE.Points(geometry, material);
+            scene.add(particlesMesh);
+
+            // Mouse Interaction
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) - 0.5;
+                mouseY = (e.clientY / window.innerHeight) - 0.5;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            animate3D();
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            if (particlesMesh) {
+                particlesMesh.rotation.y += 0.0015;
+                particlesMesh.rotation.x += 0.0008;
+
+                // Parallax response
+                particlesMesh.rotation.y += mouseX * 0.005;
+                particlesMesh.rotation.x += mouseY * 0.005;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // 2. VS Code Style Live Code Editor Sync
+        const codeTemplates = {
+            'cyber-card': `<style>
+  body { background: #070a14; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+  .card {
+    background: rgba(13, 18, 36, 0.9);
+    border: 1px solid #00f2fe;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+    padding: 24px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 280px;
+  }
+  .title { color: #00f2fe; font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+  .btn {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white; border: none; padding: 8px 16px;
+    border-radius: 8px; font-weight: bold; cursor: pointer;
+    margin-top: 12px;
+  }
+</style>
+<div class="card">
+  <div class="title">Ceylon Cyber Card</div>
+  <p style="font-size: 12px; color: #a1a1aa;">Custom 3D Motion Overlay for Video Creators</p>
+  <button class="btn" onclick="alert('Ceylon Cyber Live Demo!')">Preview Live</button>
+</div>`,
+
+            'svg-logo': `<style>
+  body { background: #030712; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+  svg { filter: drop-shadow(0 0 15px #a855f7); }
+</style>
+<svg width="120" height="120" viewBox="0 0 100 100">
+  <polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill="none" stroke="#00f2fe" stroke-width="4" />
+  <circle cx="50" cy="50" r="20" fill="#a855f7" />
+  <text x="50" y="55" font-size="12" fill="#fff" text-anchor="middle" font-family="sans-serif" font-weight="bold">CC</text>
+</svg>`,
+
+            'video-badge': `<style>
+  body { background: transparent; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+  .badge {
+    background: rgba(0,0,0,0.85);
+    border-left: 4px solid #a855f7;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-family: sans-serif;
+  }
+  .name { color: #fff; font-weight: bold; font-size: 14px; }
+  .sub { color: #00f2fe; font-size: 10px; font-mono: true; }
+</style>
+<div class="badge">
+  <div class="name">CEYLON CYBER EDITORS</div>
+  <div class="sub">4K Color Grading Active</div>
+</div>`,
+
+            'dev-profile': `<style>
+  body { background: #090d2e; color: #fff; font-family: monospace; padding: 20px; }
+  .tag { color: #00f2fe; }
+  .val { color: #c084fc; }
+</style>
+<div>
+  <div><span class="tag">creator</span>: <span class="val">"Kasun Perera"</span></div>
+  <div><span class="tag">role</span>: <span class="val">"Full Stack & 3D Dev"</span></div>
+  <div><span class="tag">github</span>: <span class="val">"github.com/ceyloncyber"</span></div>
+</div>`
+        };
+
+        function updateLivePreview() {
+            const code = document.getElementById('code-input').value;
+            const iframe = document.getElementById('preview-frame');
+            iframe.srcdoc = code;
+        }
+
+        function loadEditorTemplate(key) {
+            if (codeTemplates[key]) {
+                document.getElementById('code-input').value = codeTemplates[key];
+                document.getElementById('active-filename').innerText = key + '.html';
+                updateLivePreview();
+                showToast(`Loaded ${key} template into VS Code IDE.`, 'info');
+            }
+        }
+
+        function resetEditorCode() {
+            loadEditorTemplate('cyber-card');
+        }
+
+        function copyEditorCode() {
+            const code = document.getElementById('code-input').value;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('Source code copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy code.', 'error');
+            });
+        }
+
+        // 3. GitHub Deploy Handler
+        function handleGithubDeploy(e) {
+            e.preventDefault();
+            const input = document.getElementById('repo-url-input').value;
+            showToast(`Fetching repository: ${input}...`, 'info');
+
+            setTimeout(() => {
+                showToast(`Successfully built live preview for ${input}!`, 'success');
+                // Auto inject preview template representing deployed repo
+                document.getElementById('code-input').value = `<style>
+  body { background: #050212; color: #00f2fe; font-family: sans-serif; text-align: center; padding-top: 40px; }
+</style>
+<h3>🚀 GitHub Live Preview Active</h3>
+<p style="color: #a855f7;">Repo: ${input}</p>
+<p style="font-size: 12px; color: #aaa;">Hosted on CC Workplace Ceylon Cyber Cloud Node</p>`;
+                updateLivePreview();
+                
+                // Scroll smoothly to IDE
+                document.getElementById('studio').scrollIntoView({ behavior: 'smooth' });
+            }, 1200);
+        }
+
+        // 4. Marketplace Filter Tabs
+        function filterServices(category) {
+            const cards = document.querySelectorAll('.service-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 5. Talent Recommendation Engine Search Filter
+        function filterTalents() {
+            const query = document.getElementById('talent-search').value.toLowerCase();
+            const cards = document.querySelectorAll('.talent-card');
+
+            cards.forEach(card => {
+                const skills = card.getAttribute('data-skills').toLowerCase();
+                const text = card.innerText.toLowerCase();
+                if (skills.includes(query) || text.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 6. Modal Dialog Handlers
+        function openAuthModal(type) {
+            const modal = document.getElementById('auth-modal');
+            const card = document.getElementById('auth-modal-card');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+            }, 10);
+            switchAuthTab(type);
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            const card = document.getElementById('auth-modal-card');
+            modal.classList.add('opacity-0');
+            card.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function switchAuthTab(type) {
+            const tabSignin = document.getElementById('tab-signin');
+            const tabRegister = document.getElementById('tab-register');
+            const formSignin = document.getElementById('signin-form');
+            const formRegister = document.getElementById('register-form');
+
+            if (type === 'signin') {
+                tabSignin.className = "text-sm font-bold text-cyan-400 border-b-2 border-cyan-400 pb-1";
+                tabRegister.className = "text-sm font-bold text-slate-400 hover:text-slate-200 pb-1";
+                formSignin.classList.remove('hidden');
+                formRegister.classList.add('hidden');
+            } else {
+                tabRegister.className = "text-sm font-bold text-cyan-400 border-b-2 border-cyan-400 pb-1";
+                tabSignin.className = "text-sm font-bold text-slate-400 hover:text-slate-200 pb-1";
+                formRegister.classList.remove('hidden');
+                formSignin.classList.add('hidden');
+            }
+        }
+
+        function handleAuthSubmit(e, type) {
+            e.preventDefault();
+            closeAuthModal();
+            const userType = type === 'signin' ? 'Welcome back!' : 'Account registered successfully!';
+            showToast(`${userType} Connected to CC Workplace.`, 'success');
+            
+            // Update auth state in UI
+            document.getElementById('auth-buttons-container').innerHTML = `
+                <div class="flex items-center space-x-2 bg-slate-900 border border-cyan-500/30 px-3 py-1.5 rounded-xl">
+                    <div class="w-6 h-6 rounded-full bg-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center">C</div>
+                    <span class="text-xs text-cyan-300 font-mono">Creator Mode</span>
+                </div>
+            `;
+        }
+
+        function demoQuickAuth() {
+            handleAuthSubmit({ preventDefault: () => {} }, 'signin');
+        }
+
+        // Direct Hire Modal Logic
+        function openHireModal(serviceTitle, creatorName) {
+            document.getElementById('hire-modal-title').innerText = serviceTitle;
+            document.getElementById('hire-modal-creator').innerText = creatorName;
+            
+            const modal = document.getElementById('hire-modal');
+            const card = document.getElementById('hire-modal-card');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeHireModal() {
+            const modal = document.getElementById('hire-modal');
+            const card = document.getElementById('hire-modal-card');
+            modal.classList.add('opacity-0');
+            card.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function handleHireSubmit(e) {
+            e.preventDefault();
+            closeHireModal();
+            showToast('Direct proposal sent to creator! Check your notifications.', 'success');
+        }
+
+        // Custom Toast System (Replaces browser alert)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let borderColor = 'border-purple-500/40';
+            let textColor = 'text-cyan-300';
+            let iconName = 'info';
+
+            if (type === 'success') {
+                borderColor = 'border-emerald-500/60';
+                textColor = 'text-emerald-400';
+                iconName = 'check-circle-2';
+            } else if (type === 'error') {
+                borderColor = 'border-red-500/60';
+                textColor = 'text-red-400';
+                iconName = 'alert-circle';
+            }
+
+            toast.className = `glass-card border ${borderColor} px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-auto transform translate-y-4 opacity-0 transition-all duration-300`;
+            toast.innerHTML = `
+                <i data-lucide="${iconName}" class="w-4 h-4 ${textColor}"></i>
+                <span class="text-xs text-slate-100 font-medium">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Initialize on Window Load
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+            init3DBackground();
+            loadEditorTemplate('cyber-card');
+
+            // Initialize Vanilla Tilt for 3D card tilts
+            if (typeof VanillaTilt !== 'undefined') {
+                VanillaTilt.init(document.querySelectorAll('[data-tilt]'));
+            }
+        });
+    </script>
+</body>
+</html>
